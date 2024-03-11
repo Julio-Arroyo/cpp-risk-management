@@ -9,7 +9,7 @@ def plot_histogram_with_grouping(returns, xlab, plot_title):
     sigma = np.std(returns)
     min_return, max_return = np.min(returns), np.max(returns)
     tail_distance = 3  # no. std devs beyond which it's considered tail of distribution
-    num_bins = int(np.power(len(returns), 1/2))
+    num_bins = int(np.power(len(returns), 1/2)) - 2
 
     bins = np.linspace(mu - tail_distance*sigma, mu + tail_distance*sigma, num_bins)
     if min_return < bins[0]:
