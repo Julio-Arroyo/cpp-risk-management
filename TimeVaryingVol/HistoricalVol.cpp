@@ -2,11 +2,14 @@
 #include "NumCpp/Parse.hpp"
 #include "NumCpp/Series.hpp"
 
+#include <iomanip>  // std::fixed, std::setprecision
+
 int main() {
   std::string fname = "../../data/Monthly_3_FamaFrench_Factors.csv";
   std::vector<std::vector<double>> data = *NumCpp::readCSV(fname, false);
 
   std::vector<double> log_returns;
+  std::vector<double> returns;
   std::vector<double> dates;
   for (int i = 0; i < data.size(); i++) {
     dates.push_back(data[i][0]);
@@ -14,7 +17,9 @@ int main() {
     double pct_return = data[i][1];  // excess returns
     double rf_rate = data[i][4];
     double return_relative = 1 + (rf_rate + pct_return)/100.0;
+
     log_returns.push_back(std::log(return_relative));
+    returns.push_back((rf_rate + pct_return) / 100.0);
   }
 
 
@@ -39,5 +44,13 @@ int main() {
             << data[0][0] << "-" << data[data.size() - 1][0]
             << ": " << std::sqrt(12)*NumCpp::std(log_returns)
             << ". (Computed as annualized standard deviation of monthly log returns)"<< std::endl;
+
+  std::cout << std::fixed;
+  std::cout << std::setprecision(4);
+  std::cout << "Statistic \t Returns \t Log-returns" << std::endl;
+  std::cout << "     Mean \t " << NumCpp::mean(returns) << "          " << NumCpp::mean(log_returns) << std::endl;
+  std::cout << "      Std \t " << NumCpp::std(returns) << "          " << NumCpp::std(log_returns) << std::endl;
+  std::cout << "     Skew \t " << NumCpp::skew(returns) << "          " << NumCpp::skew(log_returns) << std::endl;
+  std::cout << " Kurtosis \t " << NumCpp::kurtosis(returns) << "          " << NumCpp::kurtosis(log_returns) << std::endl;
 }
 
