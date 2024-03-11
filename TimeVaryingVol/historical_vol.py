@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import scipy.stats
 import pandas as pd
 import numpy as np
 
@@ -61,10 +62,40 @@ mkt_return_relative = 1 + (mkt_rate_of_return)/100
 log_returns = np.log(mkt_return_relative)
 
 print(np.sqrt(12)*np.std(log_returns))
+print(scipy.stats.skew(log_returns))
+print(scipy.stats.kurtosis(log_returns))
 
 start_yyyymm = str(df.iloc[0,0])
 end_yyyymm = str(df.iloc[-1, 0])
 plot_title = f"US Stocks Monthly {start_yyyymm[-2:]}/{start_yyyymm[:-2]}-{end_yyyymm[-2:]}/{end_yyyymm[:-2]} ({len(df)} observations)"
 plot_histogram_with_grouping(log_returns, "Log Returns", plot_title)
-plot_histogram_with_grouping(mkt_rate_of_return, "Rate of Return (%)", plot_title)
+plot_histogram_with_grouping(mkt_rate_of_return/100, "Rate of Return", plot_title)
+
+percentiles = np.array([(i/(len(log_returns) + 1)) for i in range(1, len(log_returns) + 1)])
+print(percentiles)
+qq_plot_x_vals = scipy.stats.norm.ppf(percentiles)
+
+mkt_rate_of_return /= 100
+z_i_log_returns = (np.sort(log_returns) - np.mean(log_returns))/np.std(log_returns)
+z_i_returns = (np.sort(mkt_rate_of_return) - np.mean(mkt_rate_of_return))/np.std(mkt_rate_of_return)
+
+print(z_i_log_returns)
+
+line45 = np.linspace(np.min(qq_plot_x_vals),
+                     np.max(qq_plot_x_vals),
+                     100)
+
+fig, axes = plt.subplots(1, 2)
+axes[0].scatter(qq_plot_x_vals, z_i_log_returns)
+axes[0].plot(line45, line45, color='red')
+axes[0].set_title("QQ-plot log-returns")
+axes[0].set_xlabel("N^-1(percentiles)")
+axes[0].set_ylabel("Log-returns minus mean, divided by std")
+
+axes[1].scatter(qq_plot_x_vals, z_i_returns)
+axes[1].plot(line45, line45, color='red')
+axes[1].set_title("QQ-plot Returns")
+axes[1].set_xlabel("N^-1(percentiles)")
+axes[1].set_ylabel("returns minus mean, divided by std")
+plt.show()
 
